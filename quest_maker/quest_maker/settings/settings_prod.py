@@ -26,6 +26,6 @@ ADMINS = (
 
 # Set this to match the domains of the production site.
 ALLOWED_HOSTS = [
-
+    "catherinev.pythonanywhere.com"
 ]
 
