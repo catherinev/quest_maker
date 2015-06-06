@@ -18,4 +18,7 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
+    url(r'', include('quest_maker_app.urls', 
+                      namespace="quest_maker_app", 
+                      app_name="quest_maker_app")),
 ]
