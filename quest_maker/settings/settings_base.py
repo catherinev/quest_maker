@@ -95,10 +95,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
 STATIC_URL = '/static/'
-# STATIC_ROOT = os.path.join(BASE_DIR, 'quest_maker/static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'quest_maker/static/collect')
 
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'quest_maker/static'),
+    os.path.join(BASE_DIR, 'quest_maker/static/css'),
     os.path.join(BASE_DIR, 'quest_maker/static/bootstrap'),
 )
 
