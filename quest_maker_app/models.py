@@ -1,9 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 NOTABILITY_CHOICES = (
-    ("high", "high"), 
-    ("medium", "medium"), 
+    ("high", "high"),
+    ("medium", "medium"),
     ("low", "low")
     )
 
@@ -21,19 +22,19 @@ class Quest(models.Model):
     """
 
     leader = models.ForeignKey(User, related_name="quests_led")
-    users = models.ManyToManyField(User, through="UserQuest", 
+    users = models.ManyToManyField(User, through="UserQuest",
                                    through_fields=("quest", "user"))
     name = models.CharField(max_length=100, db_index=True)
     template = models.ForeignKey(QuestTemplate)
-    start_date = models.DateField(auto_now=True)
-    
-    @property 
+    start_date = models.DateField(default=timezone.now)
+
+    @property
     def waypoints(self):
         return self.template.waypoints
 
     def get_latest_user_info(self):
         """Get a dict of all users, their current distances, and the waypoints
-        they are currently at 
+        they are currently at
         """
         info = {}
         for user_quest in self.user_quests:
@@ -59,7 +60,7 @@ class Waypoint(models.Model):
     distance_from_start = models.FloatField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     notability = models.CharField(choices=NOTABILITY_CHOICES, max_length=10)
-    
+
     def __unicode__(self):
         return "Waypoint {}, id={}".format(self.name, self.pk)
 
