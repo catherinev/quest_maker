@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+
+  <h1>Welcome {{user.username}}</h1>
+
+  {% if quests %}
+    <h3>Your Quests</h3>
+    <ul>
+    {% for quest in quests %}
+      <li>{{quest.name}}</li> 
+    {% endfor%}
+    </ul>
+  {% else %}
+    <p>You have no quests</p>
+  {% endif %}
+
+
+{% endblock %}
