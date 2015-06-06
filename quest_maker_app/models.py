@@ -13,6 +13,8 @@ class QuestTemplate(models.Model):
     author = models.ForeignKey(User, related_name="quest_templates_created")
     name = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
+    created_at = models.DateField(auto_now_add=True)
+    updated_at = models.DateField(auto_now=True)
 
     def __unicode__(self):
         return "QuestTemplate {}, id={}".format(self.name, self.pk)
@@ -27,8 +29,10 @@ class Quest(models.Model):
     name = models.CharField(max_length=100, db_index=True)
     template = models.ForeignKey(QuestTemplate)
     start_date = models.DateField(default=timezone.now)
-
-    @property
+    created_at = models.DateField(auto_now_add=True)
+    updated_at = models.DateField(auto_now=True)
+    
+    @property 
     def waypoints(self):
         return self.template.waypoints
 
@@ -37,9 +41,9 @@ class Quest(models.Model):
         they are currently at
         """
         info = {}
-        for user_quest in self.user_quests:
+        for user_quest in self.user_quests.all():
             user = user_quest.user
-            info[user.name] = {
+            info[user.username] = {
                 "character": user_quest.character,
                 "distance_from_start": user_quest.update_total_miles(),
                 "waypoint": user_quest.get_waypoint()
@@ -60,7 +64,9 @@ class Waypoint(models.Model):
     distance_from_start = models.FloatField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     notability = models.CharField(choices=NOTABILITY_CHOICES, max_length=10)
-
+    created_at = models.DateField(auto_now_add=True)
+    updated_at = models.DateField(auto_now=True)
+    
     def __unicode__(self):
         return "Waypoint {}, id={}".format(self.name, self.pk)
 
@@ -69,6 +75,8 @@ class UserQuest(models.Model):
     quest = models.ForeignKey(Quest, related_name="user_quests")
     character = models.CharField(max_length=100)
     total_miles = models.FloatField()
+    created_at = models.DateField(auto_now_add=True)
+    updated_at = models.DateField(auto_now=True)
 
     def update_total_miles(self):
         pass
@@ -76,9 +84,14 @@ class UserQuest(models.Model):
     def get_waypoint(self):
         pass
 
-class DailyMile(models.Model):
+    def get_info(self):
+        return {}
+
+class DailyDistance(models.Model):
     # allows us to cache old data
     user = models.ForeignKey(User)
     miles = models.FloatField(null=True, blank=True)
     day = models.DateField()
+    created_at = models.DateField(auto_now_add=True)
+    updated_at = models.DateField(auto_now=True)
 
