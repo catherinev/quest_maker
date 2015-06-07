@@ -27,6 +27,7 @@ Thus, if you are working on a **new feature**, follow this procedure:
 
 First, pull down from develop (to make sure you're up-to-date) and create a new branch:
   ```
+  git checkout develop
   git pull origin develop
   git checkout -b "your_branch_name"
   ```
@@ -40,7 +41,7 @@ NOTE: Any time you pull down from GitHub, there may be **new migrations** or **u
 
 In other words, the app really has three components: the code, the database, and the dependencies. Pulling from GitHub changes the code but does not affect your database or your dependencies. Fortunately, the code contains (a) migration files that say how to update the database, and (b) requirements.txt which specifies current dependencies. These files are accessed by the two commands above. Certainly if you run into strange DB problems or dependency issues, make sure you have done this.
 
-**Conversely**, if you need to change the Django models, please bundle both the changes to models.py AND the corresponding migration files into the same commit, so that models and database structure always correspond within any commit. Similarly, if you need to update requirements, please make sure to update requirements.txt with ``pip freeze > requirements.txt`` and commit it along with the updated code.
+(**Conversely**, if you need to change the Django models, please bundle both the changes to models.py AND the corresponding migration files into the same commit, so that models and database structure always correspond within any commit. Similarly, if you need to update requirements, please make sure to update requirements.txt with ``pip freeze > requirements.txt`` and commit it along with the updated code.)
 
 
 When you are done working:
