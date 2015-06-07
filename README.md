@@ -56,7 +56,6 @@ When you are done working:
   ```
   git checkout your_branch_name
   git pull origin develop
-  python manage.py migrate
   ```
   (This will try to merge; fix conflicts if necessary)
 
