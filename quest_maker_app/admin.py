@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django import forms
 from django.db import models
-from .models import Quest, Waypoint, QuestTemplate, UserQuest, DailyMile
+from .models import Quest, Waypoint, QuestTemplate, UserQuest, DailyDistance
 
 # Enable inline editing of waypoints inside QuestTemplate editor.
 class WaypointInline(admin.TabularInline):
@@ -35,4 +35,4 @@ admin.site.register(Quest)
 admin.site.register(Waypoint)
 admin.site.register(QuestTemplate, QuestTemplateAdmin)
 admin.site.register(UserQuest)
-admin.site.register(DailyMile)
+admin.site.register(DailyDistance)
