@@ -28,3 +28,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Development hosts: localhost i.e. 127.0.0.1
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+# encryption for dev
+ENCRYPTION_KEY = 'This is a key123'
+INIT_VECTOR = 'This is an IV456'

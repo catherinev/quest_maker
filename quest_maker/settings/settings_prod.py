@@ -29,3 +29,6 @@ ALLOWED_HOSTS = [
     "catherinev.pythonanywhere.com"
 ]
 
+# encryption for prod
+ENCRYPTION_KEY = os.environment["ENCRYPTION_KEY"]
+INIT_VECTOR = os.environment["INIT_VECTOR"]
