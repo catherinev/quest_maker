@@ -105,3 +105,7 @@ STATICFILES_DIRS = (
 TEMPLATE_DIRS = (
     os.path.join(BASE_DIR, 'quest_maker/templates'),
 )
+
+# encryption for dev
+ENCRYPTION_KEY = 'This is a key123'
+INIT_VECTOR = 'This is an IV456'
