@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+
+  <h1>Welcome {{user.username}}</h1>
+
+  {% if quests %}
+    <h3>Your Quests</h3>
+    <ul>
+    {% for quest in quests %}
+      <li>
+        <a href="{% url 'quest_maker_app:quest' quest.pk%}">{{quest.name}}</a>
+      </li> 
+    {% endfor%}
+    </ul>
+  {% else %}
+    <p>You have no quests</p>
+  {% endif %}
+
+
+{% endblock %}

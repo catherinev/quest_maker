@@ -95,13 +95,25 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
 STATIC_URL = '/static/'
-# STATIC_ROOT = os.path.join(BASE_DIR, 'quest_maker/static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'quest_maker/static/collect')
 
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'quest_maker/static'),
+    os.path.join(BASE_DIR, 'quest_maker/static/css'),
+    os.path.join(BASE_DIR, 'quest_maker/static/js'),
     os.path.join(BASE_DIR, 'quest_maker/static/bootstrap'),
 )
 
 TEMPLATE_DIRS = (
     os.path.join(BASE_DIR, 'quest_maker/templates'),
 )
+
+DATABASES = {
+  'default': {
+     'ENGINE': 'django.db.backends.sqlite3',
+     'NAME': os.path.join(BASE_DIR, 'db.sqlite3')
+ }
+}
+
+# encryption for dev
+ENCRYPTION_KEY = 'This is a key123'
+INIT_VECTOR = 'This is an IV456'
