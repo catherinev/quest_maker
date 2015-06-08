@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+  <h1>{{user.name}}</h1>
+  <div class="table-responsive">
+    <table class="table-hover table">
+      <tr>
+        <th>Date</th>
+        <th>Daily Miles</th>
+        <th>Total Miles</th>
+        <th>Last waypoint passed</th>
+      </tr>
+    {% for day, info in daily_info.items %}
+      <tr>
+          <td>{{day}}</td>
+          <td>{{info.daily_distance}}</td>
+          <td>{{info.total_distance}}</td>
+          <td>{{info.waypoint}}</td>
+      </tr>
+
+    {% endfor %}
+    </table>
+  </div>
+
+{% endblock %}

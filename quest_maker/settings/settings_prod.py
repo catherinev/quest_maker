@@ -6,10 +6,13 @@ from quest_maker.settings.settings_base import *
 try:
     # This file is not part of the repo and contains secrets like db info.
     from env import *
-# There is no env.py file on Heroku.
+# There is no env.py file on pythonanywhere.
 # We load from environment variables instead.
 except ImportError:
     SECRET_KEY = os.environ['QUEST_MAKER_SECRET_KEY']
+    # encryption for prod
+    ENCRYPTION_KEY = os.environ["ENCRYPTION_KEY"]
+    INIT_VECTOR = os.environ["INIT_VECTOR"]
 
 DEBUG = False
 TEMPLATE_DEBUG = False
@@ -28,4 +31,5 @@ ADMINS = (
 ALLOWED_HOSTS = [
     "catherinev.pythonanywhere.com"
 ]
+
 
