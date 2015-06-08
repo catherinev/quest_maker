@@ -99,6 +99,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'quest_maker/static/collect')
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'quest_maker/static/css'),
+    os.path.join(BASE_DIR, 'quest_maker/static/js'),
     os.path.join(BASE_DIR, 'quest_maker/static/bootstrap'),
 )
 

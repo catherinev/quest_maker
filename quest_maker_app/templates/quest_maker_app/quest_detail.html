@@ -1,6 +1,27 @@
 {% extends "base.html" %}
 
 {% block main_content %}
-  <h1>Quest {{quest.name}}</h1>
+  <h1>{{quest.name}}</h1>
+  <h3>Summary as of {{yesterday}}</h3>
+  <p>Data for today will be added at midnight tonight.</p>
+  <div class="table-responsive">
+    <table class="table-hover table">
+      <tr>
+        <th>Name</th>
+        <th>Character</th>
+        <th>Total Miles</th>
+        <th>Last waypoint passed</th>
+      </tr>
+    {% for username, info in all_users_info.items %}
+      <tr class="clickable-row" data-href="{% url 'quest_maker_app:user_quest' quest.pk info.user_id%}">
+          <td>{{username}}</td>
+          <td>{{info.character}}</td>
+          <td>{{info.distance_from_start}}</td>
+          <td>{{info.waypoint}}</td>
+      </tr>
+
+    {% endfor %}
+    </table>
+  </div>
 
 {% endblock %}
