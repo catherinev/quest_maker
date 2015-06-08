@@ -1,14 +1,17 @@
 {% extends "base.html" %}
 
+{% block title %}Log In{% endblock %}
+
 {% block main_content %}
 
+    <h1>Log In</h1>
 
     {% if form.errors %}
     <p>Your username and password didn't match. Please try again.</p>
     {% endif %}
 
 
-    <form method="post" action="{% url 'django.contrib.auth.views.login' %}">
+    <form method="post" action=".">
     {% csrf_token %}
     <table>
     <tr>
@@ -27,7 +30,7 @@
     <input type="hidden" name="next" value="{% url 'quest_maker_app:homepage' %}" />
     </form>
 
-    {# Assumes you setup the password_reset view in your URLconf #}
-    <p><a href="{% url 'password_reset' %}">Lost password?</a></p>
 
+    {# <p><a href="{% url 'quest_maker_app:password_reset' %}">Lost password?</a></p> #}
+    <p><a href="{% url 'quest_maker_app:signup' %}">Sign Up.</a></p>
 {% endblock %}

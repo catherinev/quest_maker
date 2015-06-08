@@ -15,20 +15,12 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-from django.core.urlresolvers import reverse
+
+
+# Format of url(): url(regex, view, kwargs=None, name=None, prefix='')
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-
-    # Authentication. See https://docs.djangoproject.com/en/1.8/topics/auth/default/
-    # By default, these views look for templates inside
-    # quest_maker/templates/registration/
-    url(r'^login/', 'django.contrib.auth.views.login', name='login'),
-
-    url(r'^password-reset/', 'django.contrib.auth.views.password_reset',
-        name='password_reset'),
-
-
     url(r'', include('quest_maker_app.urls',
                       namespace="quest_maker_app",
                       app_name="quest_maker_app")),
