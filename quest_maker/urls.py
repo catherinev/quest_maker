@@ -17,8 +17,6 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 
-# Format of url(): url(regex, view, kwargs=None, name=None, prefix='')
-
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'', include('quest_maker_app.urls',
