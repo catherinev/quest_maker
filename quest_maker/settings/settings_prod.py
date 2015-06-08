@@ -5,6 +5,10 @@ from quest_maker.settings.settings_base import *
 
 SECRET_KEY = os.environ['QUEST_MAKER_SECRET_KEY']
 
+# encryption for prod
+ENCRYPTION_KEY = os.environ["ENCRYPTION_KEY"]
+INIT_VECTOR = os.environ["INIT_VECTOR"]
+
 DEBUG = False
 TEMPLATE_DEBUG = False
 
@@ -22,4 +26,5 @@ ADMINS = (
 ALLOWED_HOSTS = [
     "catherinev.pythonanywhere.com"
 ]
+
 

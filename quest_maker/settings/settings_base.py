@@ -99,6 +99,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'quest_maker/static/collect')
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'quest_maker/static/css'),
+    os.path.join(BASE_DIR, 'quest_maker/static/js'),
     os.path.join(BASE_DIR, 'quest_maker/static/bootstrap'),
 )
 
@@ -112,3 +113,7 @@ DATABASES = {
      'NAME': os.path.join(BASE_DIR, 'db.sqlite3')
  }
 }
+
+# encryption for dev
+ENCRYPTION_KEY = 'This is a key123'
+INIT_VECTOR = 'This is an IV456'
