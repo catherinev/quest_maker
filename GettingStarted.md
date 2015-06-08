@@ -54,7 +54,7 @@ This will initialize the database and run any migrations, bringing you up-to-dat
 ## Next Steps
 You should now be able to launch the app locally by navigating to the root project directory (which contains manage.py) and executing:
   ```
-  python manage.py runserver
+  python manage.py runserver --settings=quest_maker.settings.settings_dev
   ```
 
 **Visit localhost:8000 and you should see the site!**
