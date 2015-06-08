@@ -21,6 +21,7 @@ Please report and problems or confusion you have in following these instructions
     ```
     export WORKON_HOME=~/.virtualenvs  # or the folder you just created
     export PROJECT_HOME=~/code/projects/  # or wherever you cloned the project
+    export MACHINE=local
     source /usr/local/bin/virtualenvwrapper.sh  # or your path to virtualenvwrapper.sh
     ```
    d) Run .bashrc:

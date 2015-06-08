@@ -107,6 +107,13 @@ TEMPLATE_DIRS = (
     os.path.join(BASE_DIR, 'quest_maker/templates'),
 )
 
+DATABASES = {
+  'default': {
+     'ENGINE': 'django.db.backends.sqlite3',
+     'NAME': os.path.join(BASE_DIR, 'db.sqlite3')
+ }
+}
+
 # encryption for dev
 ENCRYPTION_KEY = 'This is a key123'
 INIT_VECTOR = 'This is an IV456'
