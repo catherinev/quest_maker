@@ -21,6 +21,7 @@ Please report and problems or confusion you have in following these instructions
     ```
     export WORKON_HOME=~/.virtualenvs  # or the folder you just created
     export PROJECT_HOME=~/code/projects/  # or wherever you cloned the project
+    export MACHINE=local
     source /usr/local/bin/virtualenvwrapper.sh  # or your path to virtualenvwrapper.sh
     ```
    d) Run .bashrc:
@@ -54,7 +55,7 @@ This will initialize the database and run any migrations, bringing you up-to-dat
 ## Next Steps
 You should now be able to launch the app locally by navigating to the root project directory (which contains manage.py) and executing:
   ```
-  python manage.py runserver --settings=quest_maker.settings.settings_dev
+  python manage.py runserver
   ```
 
 **Visit localhost:8000 and you should see the site!**
