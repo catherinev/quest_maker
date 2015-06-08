@@ -8,7 +8,9 @@
     <h3>Your Quests</h3>
     <ul>
     {% for quest in quests %}
-      <li>{{quest.name}}</li> 
+      <li>
+        <a href="{% url 'quest_maker_app:quest' quest.pk%}">{{quest.name}}</a>
+      </li> 
     {% endfor%}
     </ul>
   {% else %}
