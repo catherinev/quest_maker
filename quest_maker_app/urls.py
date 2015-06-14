@@ -39,4 +39,7 @@ urlpatterns = [
     url(r'^quest/(?P<quest_id>\d+)/user/(?P<user_id>\d+)/$',
         views.user_quest,
         name='user_quest'),
+    url(r'^fitbit_signup/$',
+        TemplateView.as_view(template_name='quest_maker_app/fitbit_signup.html'),
+        name='fitbit_signup'),
 ]

@@ -85,3 +85,4 @@ def user_quest(request, quest_id, user_id):
     else:
         raise PermissionDenied
 
+

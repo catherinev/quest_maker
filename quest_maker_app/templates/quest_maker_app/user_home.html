@@ -17,5 +17,9 @@
     <p>You have no quests</p>
   {% endif %}
 
-
+  {% if not user.profile.fitbit_enabled %}
+    <a href="{% url 'quest_maker_app:fitbit_signup' %}"
+                class="btn btn-info navbar-form pull-right"
+                role="button">Enable fitbit</a>
+  {% endif %}
 {% endblock %}

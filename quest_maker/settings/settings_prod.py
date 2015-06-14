@@ -3,11 +3,15 @@ import dj_database_url
 from quest_maker.settings.settings_base import *
 
 
-SECRET_KEY = os.environ['QUEST_MAKER_SECRET_KEY']
+try:
+    SECRET_KEY = os.environ['QUEST_MAKER_SECRET_KEY']
 
-# encryption for prod
-ENCRYPTION_KEY = os.environ["ENCRYPTION_KEY"]
-INIT_VECTOR = os.environ["INIT_VECTOR"]
+    # encryption for prod
+    ENCRYPTION_KEY = os.environ["ENCRYPTION_KEY"]
+    INIT_VECTOR = os.environ["INIT_VECTOR"]
+except KeyError:
+    # this may happen when running migrations (etc) in prod
+    pass
 
 DEBUG = False
 TEMPLATE_DEBUG = False
