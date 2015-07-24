@@ -9,9 +9,6 @@ INSTALLED_APPS += (
 
 )
 
-
-
-
 #For development, I don't actually send emails.
 # This makes emails print to the console:
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

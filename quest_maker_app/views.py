@@ -1,4 +1,4 @@
-from django.shortcuts import render, render_to_response, get_object_or_404
+from django.shortcuts import render, render_to_response, get_object_or_404, redirect
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_protect
@@ -9,8 +9,13 @@ from django.template import RequestContext
 
 from models import Quest, User, UserQuest
 from forms import RegistrationForm
+from django.conf import settings
 
 import datetime
+import fitbit
+
+FITBIT_KEY = settings.SOCIAL_AUTH_FITBIT_KEY
+FITBIT_SECRET = settings.SOCIAL_AUTH_FITBIT_SECRET
 
 
 def homepage(request):
@@ -22,6 +27,15 @@ def homepage(request):
             "user": user,
             "quests": quests
         }
+        if user.social_auth.exists():
+            # the user has attached a fitbit account
+            user_tokens = user.social_auth.get().access_token
+            user_key = user_tokens["oauth_token"]
+            user_secret = user_tokens["oauth_token_secret"]
+            authd_client = fitbit.Fitbit(FITBIT_KEY, FITBIT_SECRET, 
+                resource_owner_key=user_key, resource_owner_secret=user_secret)
+            distances = authd_client.time_series('activities/distance', period='7d')
+            params["distances"] = distances
         return render(request, 'quest_maker_app/user_home.html', params)
     else:
         return render(request, 'quest_maker_app/homepage.html', {})
@@ -85,4 +99,11 @@ def user_quest(request, quest_id, user_id):
     else:
         raise PermissionDenied
 
+def fitbit_signup(request):
+    request_user = request.user
+    is_fitbit_user = request_user.social_auth.exists()
+    if is_fitbit_user is None:
+        return render(request, 'quest_maker_app/fitbit_signup.html', {})
+    else:
+        return redirect('quest_maker_app:homepage')
 
