@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+  <p>Insert info about privacy</p>
+
+
+  <a href="{% url 'social:begin' 'fitbit' %}?next={% url 'quest_maker_app:homepage' %}"
+                class="btn btn-info navbar-form pull-right"
+                role="button">I agree</a>
+{% endblock %}

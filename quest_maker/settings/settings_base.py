@@ -48,6 +48,7 @@ DEFAULT_APPS = (
 
 THIRD_PARTY_APPS = (
     'django_extensions',
+    'social.apps.django_app.default',
 )
 
 LOCAL_APPS = (
@@ -56,12 +57,35 @@ LOCAL_APPS = (
 
 INSTALLED_APPS = DEFAULT_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
+AUTHENTICATION_BACKENDS = (
+    'social.backends.fitbit.FitbitOAuth',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+# AUTH_USER_MODEL = 'quest_maker_app.models.CustomUser'
+SOCIAL_AUTH_LOGIN_URL = '/fitbit-login/'
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/'
+SOCIAL_AUTH_URL_NAMESPACE = 'social'
+SOCIAL_AUTH_PIPELINE = (
+    'social.pipeline.social_auth.social_details',
+    'social.pipeline.social_auth.social_uid',
+    'social.pipeline.social_auth.auth_allowed',
+    'social.pipeline.social_auth.social_user',
+    'social.pipeline.user.get_username',
+    'social.pipeline.user.create_user',
+    'social.pipeline.social_auth.associate_user',
+    'social.pipeline.social_auth.load_extra_data',
+    'social.pipeline.user.user_details'
+)
 
 # This enables us to access request data from a template, for example
 # so we can access the current page's url.
 # See here: http://stackoverflow.com/questions/7665514/django-highlight-navigation-based-on-current-page
 TEMPLATE_CONTEXT_PROCESSORS += (
     'django.core.context_processors.request',
+    'django.contrib.messages.context_processors.messages',
+    'social.apps.django_app.context_processors.backends',
+    'social.apps.django_app.context_processors.login_redirect',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -77,8 +101,6 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'quest_maker.urls'
 
 WSGI_APPLICATION = 'quest_maker.wsgi.application'
-
-
 
 
 # Internationalization
@@ -117,3 +139,13 @@ DATABASES = {
 # encryption for dev
 ENCRYPTION_KEY = 'This is a key123'
 INIT_VECTOR = 'This is an IV456'
+
+# social auth
+SOCIAL_AUTH_FITBIT_LOGIN_URL = '/fitbit/login/'
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/'
+try:
+    SOCIAL_AUTH_FITBIT_KEY = os.environ["FITBIT_KEY"]
+    SOCIAL_AUTH_FITBIT_SECRET = os.environ["FITBIT_SECRET"]
+except KeyError:
+    msg = "You must set the FITBIT_KEY and FITBIT_SERCRET environment variables"
+    raise KeyError(msg)
