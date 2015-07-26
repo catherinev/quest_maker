@@ -13,10 +13,7 @@ from forms import RegistrationForm
 from django.conf import settings
 
 import datetime
-import fitbit
-
-FITBIT_KEY = settings.SOCIAL_AUTH_FITBIT_KEY
-FITBIT_SECRET = settings.SOCIAL_AUTH_FITBIT_SECRET
+from django.utils import timezone
 
 
 def homepage(request):
@@ -28,15 +25,6 @@ def homepage(request):
             "user": user,
             "quests": quests
         }
-        if user.social_auth.exists():
-            # the user has attached a fitbit account
-            user_tokens = user.social_auth.get().access_token
-            user_key = user_tokens["oauth_token"]
-            user_secret = user_tokens["oauth_token_secret"]
-            authd_client = fitbit.Fitbit(FITBIT_KEY, FITBIT_SECRET, 
-                resource_owner_key=user_key, resource_owner_secret=user_secret)
-            distances = authd_client.time_series('activities/distance', period='7d')
-            params["distances"] = distances
         return render(request, 'quest_maker_app/user_home.html', params)
     else:
         return render(request, 'quest_maker_app/homepage.html', {})
@@ -68,14 +56,20 @@ def signup(request):
 
 @login_required
 def quest(request, quest_id):
-    # make sure user has access to quest
     user = request.user
     quest = Quest.objects.get(id=quest_id)
+    # make sure user has access to quest
     if quest in user.quest_set.all():
+        # update database at most once an hour
+        now = timezone.now()
+        mins_since_last_updated = (now - quest.users_last_updated).seconds / 60
+        if mins_since_last_updated > 60:
+            quest.update_from_fitbit()
+
         user_info = UserQuest.objects.get(user_id=user.id).get_info()
 
-        everyone_on_quest = quest.get_latest_user_info()
-        yesterday = datetime.date.today() - datetime.timedelta(1)
+        everyone_on_quest = quest.get_users_info()
+        yesterday = quest.get_latest_day()
         params = {
             "quest": quest,
             "user_info": user_info,
@@ -96,7 +90,7 @@ def user_quest(request, quest_id, user_id):
     quest = Quest.objects.get(id=quest_id)
     if quest in request_user.quest_set.all():
         user = User.objects.get(id=user_id)
-        user_quest = UserQuest.objects.filter(user_id=user.id).filter(
+        user_quest = UserQuest.objects.filter(user_id=user.id).get(
                                               quest_id=quest.id)
         params = {
             "username": user.username,
@@ -116,4 +110,3 @@ def fitbit_signup(request):
         return render(request, 'quest_maker_app/fitbit_signup.html', {})
     else:
         return redirect('quest_maker_app:homepage')
-

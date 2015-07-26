@@ -18,8 +18,8 @@ class Waypoint(models.Model):
     distance_from_start = models.FloatField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     notability = models.CharField(choices=NOTABILITY_CHOICES, max_length=10)
-    created_at = models.DateField(auto_now_add=True)
-    updated_at = models.DateField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     def __unicode__(self):
         return "Waypoint id={} name={}".format(self.pk, self.name)
