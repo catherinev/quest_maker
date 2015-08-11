@@ -16,8 +16,8 @@
       <tr class="clickable-row" data-href="{% url 'quest_maker_app:user_quest' quest.pk info.user_id%}">
           <td>{{username}}</td>
           <td>{{info.character}}</td>
-          <td>{{info.distance_from_start}}</td>
-          <td>{{info.waypoint}}</td>
+          <td>{{info.total_miles}}</td>
+          <td>{{info.waypoint.name}}</td>
       </tr>
 
     {% endfor %}

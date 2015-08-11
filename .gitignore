@@ -6,6 +6,7 @@ db.sqlite3
 
 # Django stuff:
 *.log
+quest_maker/static/collect/
 
 # Sphinx documentation
 docs/_build/

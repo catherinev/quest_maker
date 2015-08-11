@@ -1,17 +1,21 @@
-from Crypto.Cipher import AES
-import os
+"""Helper functions that may be used throughout the application"""
 
-from django.conf import settings
+from datetime import datetime
 
-ENCRYPTION_KEY = settings.ENCRYPTION_KEY
-INIT_VECTOR = settings.INIT_VECTOR
+FITBIT_DATETIME_FORMAT = "%Y-%m-%d"
 
+def validate_date_range(begin_date, end_date):
+    """begin_date and end_date should both be dates (not datetimes)"""
+    if begin_date is None:
+        begin_date = datetime.today().date()
+    if end_date is None:
+        end_date = datetime.today().date()
+    if end_date < begin_date:
+        msg = ("begin_date={} must be less than or equal to end_date={}"
+                    .format(begin_date, end_date))
+        raise ValueError(msg)
+    return (begin_date, end_date)
 
-def encrypt(string):
-    obj = AES.new(ENCRYPTION_KEY, AES.MODE_CBC, INIT_VECTOR)
-    return obj.encrypt(string)
-
-
-def decrypt(string):
-    obj = AES.new(ENCRYPTION_KEY, AES.MODE_CBC, INIT_VECTOR)
-    return obj.decrypt(string)
+def fitbit_datetime_to_date(str_date):
+    """Convert a string of the form YYYY-MM-DD to a date"""
+    return datetime.strptime(str_date, FITBIT_DATETIME_FORMAT).date()

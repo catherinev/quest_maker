@@ -4,6 +4,9 @@ from django.utils import timezone
 
 from .quest_template import QuestTemplate
 
+from django.utils import timezone
+from datetime import datetime, timedelta
+
 
 class Quest(models.Model):
     """A quest"""
@@ -13,27 +16,69 @@ class Quest(models.Model):
     name = models.CharField(max_length=100, db_index=True)
     template = models.ForeignKey(QuestTemplate)
     start_date = models.DateField(default=timezone.now)
-    created_at = models.DateField(auto_now_add=True)
-    updated_at = models.DateField(auto_now=True)
+    users_last_updated = models.DateTimeField()
+    hours_offset_utc = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     @property 
-    def waypoints(self):
-        return self.template.waypoints
+    def waypoint_set(self):
+        return self.template.waypoint_set
 
-    def get_latest_user_info(self):
-        """Get a dict of all users, their current distances, and the waypoints
-        they are currently at
+    def update_from_fitbit(self):
+        """Update with various info from the fitbit API"""
+        self.update_timezone_fitbit()
+        self.update_dist_fitbit()
+
+    def update_dist_fitbit(self):
+        """
+        Update the db with the latest data from Fitbit for all the users in the 
+        Quest
+        """
+        latest_info = {}
+        for user_quest in self.user_quests.all():
+            user = user_quest.user
+            new_info = user.profile.update_dist_fitbit(
+                begin_date=self.start_date, end_date=self.get_latest_day())
+            latest_info[user.username] = new_info
+        self.users_last_updated = timezone.now()
+        self.save()
+        return latest_info
+
+    def update_timezone_fitbit(self):
+        """
+        Get the timezones from all fitbit users; set the quest timezone
+        to be the latest one
+        """
+        utc_offsets = set()
+        for user_quest in self.user_quests.all():
+            user = user_quest.user
+            utc_offsets.add(user.profile.get_timezone_fitbit())
+        utc_offsets = utc_offsets - set([None])
+        if len(utc_offsets) > 0:
+            self.hours_offset_utc = min(utc_offsets)
+            self.save()
+            return self.hours_offset_utc
+
+    def get_users_info(self):
+        """Get a dict of info about all users on the quest
         """
         info = {}
         for user_quest in self.user_quests.all():
             user = user_quest.user
-            info[user.username] = {
-                "character": user_quest.character,
-                "distance_from_start": user_quest.update_total_miles(),
-                "waypoint": user_quest.get_waypoint(),
-                "user_id": user.id
-            }
+            info[user.username] = user_quest.get_info()
         return info
+
+    def get_latest_day(self):
+        """
+        Get the latest data we will report to the user.  We want to report 
+        yesterday's data, where "yesterday" is defined according to the timezone
+        of the quest.
+        """
+        return (timezone.now() 
+                + timedelta(hours=self.hours_offset_utc)
+                - timedelta(days=1)
+                ).date()
 
     def __unicode__(self):
         return "Quest id={} name={}".format(self.pk, self.name)

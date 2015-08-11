@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.conf.urls import url, include
 from django.views.generic import TemplateView, FormView
 from django.contrib.auth import views as authviews
 
@@ -32,11 +32,13 @@ urlpatterns = [
     url(r'^password-reset/$',
         authviews.password_reset,
         name='password_reset'),
-
     url(r'^quest/(?P<quest_id>\d+)/$',
         views.quest,
         name='quest'),
     url(r'^quest/(?P<quest_id>\d+)/user/(?P<user_id>\d+)/$',
         views.user_quest,
         name='user_quest'),
+    url(r'^fitbit_signup/$',
+        views.fitbit_signup,
+        name='fitbit_signup'),
 ]

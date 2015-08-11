@@ -5,6 +5,8 @@ from django import forms
 from django.db import models
 from .models import (Quest, Waypoint, QuestTemplate, UserQuest, DailyDistance, 
                      Profile)
+from social.apps.django_app.default.models import (UserSocialAuth, Nonce, 
+                                                   Association)
 
 # Enable inline editing of waypoints inside QuestTemplate editor.
 class WaypointInline(admin.TabularInline):
@@ -36,13 +38,24 @@ class ProfileInline(admin.StackedInline):
     can_delete = False
     verbose_name_plural = 'profile'
 
+class SocialInline(admin.StackedInline):
+    model = UserSocialAuth
+    can_delete = False
+    verbose_name_plural = 'social'
+    fields = ("user", "provider")
+
 class UserAdmin(UserAdmin):
-    inlines = (ProfileInline, )
+    inlines = [ProfileInline, SocialInline]
+
+
 
 
 # Reregister the User admin.
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
+admin.site.unregister(UserSocialAuth)
+admin.site.unregister(Nonce)
+admin.site.unregister(Association)
 # Register the rest of the models.
 admin.site.register(Quest)
 admin.site.register(Waypoint)
