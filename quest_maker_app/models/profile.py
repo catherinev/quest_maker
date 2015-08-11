@@ -10,6 +10,7 @@ import fitbit
 
 FITBIT_KEY = settings.SOCIAL_AUTH_FITBIT_KEY
 FITBIT_SECRET = settings.SOCIAL_AUTH_FITBIT_SECRET
+MILLIS_PER_HOUR = 3600000.0
 
 
 class Profile(models.Model):
@@ -29,6 +30,12 @@ class Profile(models.Model):
         return self.user.social_auth.exists()
 
     @property
+    def authd_client(self):
+        if not hasattr(self, "_authd_client"):
+            self._authd_client = self.get_authd_client()
+        return self._authd_client
+
+    @property
     def short_name(self):
         return "{} {}.".format(self.first_name, self.last_name[0])
 
@@ -40,13 +47,13 @@ class Profile(models.Model):
             user_secret = user_tokens["oauth_token_secret"]
             # note that system="en_US" ensures that we receive data in US 
             # units as defined here: https://wiki.fitbit.com/display/API/API+Unit+System
-            self.authd_client = fitbit.Fitbit(FITBIT_KEY, 
-                                              FITBIT_SECRET, 
-                                              resource_owner_key=user_key, 
-                                              resource_owner_secret=user_secret,
-                                              system="en_US")
+            authd_client = fitbit.Fitbit(FITBIT_KEY, 
+                                         FITBIT_SECRET, 
+                                         resource_owner_key=user_key, 
+                                         resource_owner_secret=user_secret,
+                                         system="en_US")
             
-            return self.authd_client
+            return authd_client
         else:
             return None
 
@@ -66,19 +73,12 @@ class Profile(models.Model):
 
             # 2. Get data from Fitbit
             fitbit_distances = self.get_dist_fitbit(begin_date, end_date)
-            fitbit_distances = [DailyDistance(user=self.user, 
-                                              miles=datum["value"], 
-                                              day=datum["dateTime"],
-                                              manually_entered=False)
-                                for datum in fitbit_distances]
-            fitbit_days = {util.fitbit_datetime_to_date(datum.day)
-                           for datum in fitbit_distances}
+            fitbit_days = {datum.day for datum in fitbit_distances}
 
             # 3. Add NEW data from Fitbit to db
             missing_days = fitbit_days - db_days
             new_fitbit_distances = [datum for datum in fitbit_distances 
-                                    if util.fitbit_datetime_to_date(datum.day) 
-                                    in missing_days]
+                                    if datum.day in missing_days]
 
             for datum in new_fitbit_distances:
                 datum.save()
@@ -91,11 +91,16 @@ class Profile(models.Model):
         returned in miles.
         """
         begin_date, end_date = util.validate_date_range(begin_date, end_date)
-        authd_client = self.get_authd_client()
-        fitbit_distances = authd_client.time_series('activities/distance', 
-                                                    base_date=begin_date,
-                                                    end_date=end_date)
-        return fitbit_distances['activities-distance']
+        fitbit_distances = self.authd_client.time_series('activities/distance', 
+                                                           base_date=begin_date,
+                                                           end_date=end_date)
+        fitbit_distances = [
+            DailyDistance(user=self.user, 
+                          miles=datum["value"], 
+                          day=util.fitbit_datetime_to_date(datum["dateTime"]),
+                          manually_entered=False)
+            for datum in fitbit_distances['activities-distance']]
+        return fitbit_distances
 
     def get_dist_db(self, begin_date, end_date):
         """Get distances that are already stored in the database"""
@@ -108,9 +113,8 @@ class Profile(models.Model):
     def get_timezone_fitbit(self):
         """Get the timezone the user has set via fitbit"""
         if self.fitbit_enabled:
-            authd_client = self.get_authd_client()
-            fitbit_user_info = authd_client.user_profile_get()["user"]
-            return fitbit_user_info["offsetFromUTCMillis"] / 3600000.0
+            fitbit_user_info = self.authd_client.user_profile_get()["user"]
+            return fitbit_user_info["offsetFromUTCMillis"] / MILLIS_PER_HOUR
 
     def get_total_miles(self, start_date=None, end_date=None):
         """
@@ -120,10 +124,7 @@ class Profile(models.Model):
         start_date, end_date = util.validate_date_range(start_date, end_date)
         daily_distances = self.user.dailydistance_set.filter(
             day__range=[start_date, end_date])
-        total = 0
-        for day in daily_distances:
-            total += day.miles
-        return total
+        return sum(day.miles for day in daily_distances)
 
     def __unicode__(self):
         return "Profile id={} for user with id={} username={}".format(

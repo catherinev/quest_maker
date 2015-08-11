@@ -22,6 +22,11 @@ quest_template = QuestTemplate(author_id=1,
                                name="sample quest template")
 quest_template.save()
 
+start = Waypoint(quest_template_id=1, 
+                     notability="medium",
+                     distance_from_start=0,
+                     name="start",
+                     description="this is the start")
 waypoint1 = Waypoint(quest_template_id=1, 
                      notability="medium",
                      distance_from_start=2.0,
@@ -42,6 +47,7 @@ waypoint4 = Waypoint(quest_template_id=1,
                      distance_from_start=15.0,
                      name="waypoint 4",
                      description="this is waypoint 1")
+start.save()
 waypoint1.save()
 waypoint2.save()
 waypoint3.save()

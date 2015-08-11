@@ -23,6 +23,12 @@ class UserQuest(models.Model):
     def daily_distances(self):
         return self.user.dailydistance_set.filter(day__gte=self.quest.start_date)
 
+    @property
+    def latest_day(self):
+        if not hasattr(self, "_latest_day"):
+            self._latest_day = self.quest.get_latest_day()
+        return self._latest_day
+    
     def update_total_miles(self):
         self.total_miles = self.get_total_miles()
         self.save()
@@ -39,38 +45,33 @@ class UserQuest(models.Model):
                                                  end_date=end_date)
 
     def get_waypoint(self, day=None):
+        """Find the last waypoint passed as of the given day"""
         if day is None:
-            day = self.quest.get_latest_day()
+            day = self.latest_day
         distance_traveled = self.get_total_miles(end_date=day)
         
         waypoints = self.quest.waypoint_set.all()
         waypoints = sorted(waypoints, key=lambda x: x.distance_from_start)
         
-        # this doesn't quite deal with people who haven't passed the first waypoint
-        last_waypoint = waypoints[0]
-        for waypoint in waypoints:
-            if waypoint.distance_from_start > distance_traveled:
-                return last_waypoint
-            else:
-                last_waypoint = waypoint
-        return "You have finished the quest"
-
-
+        passed_waypoints = filter(
+            lambda x: x.distance_from_start <= distance_traveled,
+            waypoints)
+        return passed_waypoints[-1]
 
     def get_info(self):
-        latest_day = self.quest.get_latest_day()
+        """Get summary of latest info for the user"""
         return {
             "name": self.user.username,
             "quest": self.quest.name,
             "character": self.character,
-            "total_miles": self.get_total_miles(end_date=latest_day),
-            "waypoint": self.get_waypoint(day=latest_day),
+            "total_miles": self.get_total_miles(end_date=self.latest_day),
+            "waypoint": self.get_waypoint(),
             "user_id": self.user.id
         }
 
     def get_daily_info(self):
         """Get daily info for each day in the quest, reverse sorted by day"""
-        latest_day = self.quest.get_latest_day()
+        latest_day = self.latest_day
         info = []
         for datum in self.user.dailydistance_set.filter(
             day__range=[self.quest.start_date, latest_day]):

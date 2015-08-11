@@ -65,7 +65,6 @@ def quest(request, quest_id):
         mins_since_last_updated = (now - quest.users_last_updated).seconds / 60
         if mins_since_last_updated > 60:
             quest.update_from_fitbit()
-
         user_info = UserQuest.objects.get(user_id=user.id).get_info()
 
         everyone_on_quest = quest.get_users_info()
