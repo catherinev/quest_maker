@@ -1,6 +1,6 @@
 """Helper functions that may be used throughout the application"""
 
-from datetime import datetime
+from datetime import datetime, timedelta, date
 
 FITBIT_DATETIME_FORMAT = "%Y-%m-%d"
 
@@ -19,3 +19,16 @@ def validate_date_range(begin_date, end_date):
 def fitbit_datetime_to_date(str_date):
     """Convert a string of the form YYYY-MM-DD to a date"""
     return datetime.strptime(str_date, FITBIT_DATETIME_FORMAT).date()
+
+
+def daterange(begin_date, end_date, inclusive=False):
+    """
+    Used to iterate through dates in the given range.  begin_date is always
+    included.  end_date is only included if inclusive is set to True.
+    """
+    num_days = int((end_date - begin_date).days)
+    if inclusive:
+        num_days += 1
+    for num in range(num_days):
+        yield begin_date + timedelta(num)
+        

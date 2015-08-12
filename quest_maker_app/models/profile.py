@@ -7,6 +7,7 @@ from .daily_distance import DailyDistance
 from .. import util
 
 import fitbit
+import datetime
 
 FITBIT_KEY = settings.SOCIAL_AUTH_FITBIT_KEY
 FITBIT_SECRET = settings.SOCIAL_AUTH_FITBIT_SECRET
@@ -129,6 +130,19 @@ class Profile(models.Model):
     def __unicode__(self):
         return "Profile id={} for user with id={} username={}".format(
                 self.pk, self.user_id, self.user.username)
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            try:
+                p = Profile.objects.get(user=self.user)
+                self.pk = p.pk
+                # the following line should not be necessary
+                # but, for unknown reasons, it is
+                self.created_at = datetime.datetime.now()
+            except Profile.DoesNotExist:
+                pass
+
+        super(Profile, self).save(*args, **kwargs)
 
 def create_user_profile(sender, instance, created, **kwargs):
     if created:

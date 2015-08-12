@@ -1,9 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 from .quest import Quest
 from .daily_distance import DailyDistance
+from .. import util
 
 class UserQuest(models.Model):
     """
@@ -21,13 +23,35 @@ class UserQuest(models.Model):
 
     @property
     def daily_distances(self):
-        return self.user.dailydistance_set.filter(day__gte=self.quest.start_date)
+        if not hasattr(self, "_daily_distances"):
+            self._daily_distances = self.user.dailydistance_set.filter(
+                day__gte=self.quest.start_date)
+        return self._daily_distances
 
     @property
     def latest_day(self):
         if not hasattr(self, "_latest_day"):
-            self._latest_day = self.quest.get_latest_day()
+            self._latest_day = self.quest.latest_day
         return self._latest_day
+
+    @property 
+    def day_finished(self):
+        if not hasattr(self, "_day_finished"):
+            self._day_finished = self._get_day_finished()
+        return self._day_finished
+
+    def _get_day_finished(self):
+        """Determine the day the user has finished the quest"""
+        length = self.quest.length
+        if self.total_miles < length:
+            return None
+        else:
+            total = 0
+            daily_distances = sorted(self.daily_distances, key=lambda x: x.day)
+            for daily_distance in daily_distances:
+                total += daily_distance.miles
+                if total >= length:
+                    return daily_distance.day
     
     def update_total_miles(self):
         self.total_miles = self.get_total_miles()
@@ -66,21 +90,37 @@ class UserQuest(models.Model):
             "character": self.character,
             "total_miles": self.get_total_miles(end_date=self.latest_day),
             "waypoint": self.get_waypoint(),
-            "user_id": self.user.id
+            "user_id": self.user.id,
+            "day_finished": self.day_finished
         }
 
     def get_daily_info(self):
         """Get daily info for each day in the quest, reverse sorted by day"""
-        latest_day = self.latest_day
+        start_date = self.quest.start_date
+        last_day = self.day_finished or self.latest_day
         info = []
+        # get daily info from the database
         for datum in self.user.dailydistance_set.filter(
-            day__range=[self.quest.start_date, latest_day]):
+            day__range=[start_date, last_day]):
             info.append({
                 "day": datum.day,
                 "daily_distance": datum.miles,
                 "total_distance": self.get_total_miles(end_date=datum.day),
                 "waypoint": self.get_waypoint(day=datum.day)
             })
+        # add any days that aren't in the database
+        days_in_db = {datum["day"] for datum in info}
+        all_days_on_quest = set(
+            util.daterange(start_date, last_day, inclusive=True))
+        missing_days = all_days_on_quest - days_in_db
+        for day in missing_days:
+            info.append({
+                "day": day,
+                "daily_distance": "-",
+                "total_distance": self.get_total_miles(end_date=day),
+                "waypoint": self.get_waypoint(day=day)
+            })
+
         info = sorted(info, key=lambda x: x["day"], reverse=True)
         return info
     

@@ -13,6 +13,15 @@ class QuestTemplate(models.Model):
 
     ## TO DO: add validation that checks for a waypoint
     ## with distance 0; add a default if missing
+    @property
+    def last_waypoint(self):
+        sorted_waypoints = sorted(
+            self.waypoint_set.all(), key=lambda x: x.distance_from_start)
+        return sorted_waypoints[-1]
 
+    @property
+    def length(self):
+        return self.last_waypoint.distance_from_start
+    
     def __unicode__(self):
         return "QuestTemplate id={} name={}".format(self.pk, self.name)
