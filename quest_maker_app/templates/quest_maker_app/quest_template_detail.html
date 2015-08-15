@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+  <h1>About {{q_template.name}}</h1>
+  <div class="table-responsive">
+    <table class="table-hover table">
+      <tr>
+        <th>Waypoint</th>
+        <th>Distance From Beginning</th>
+        <th>Notability</th>
+        <th>Description</th>
+      </tr>
+    {% for waypoint in waypoints %}
+      <tr>
+          <td>{{waypoint.name}}</td>
+          <td>{{waypoint.distance_from_start}}</td>
+          <td>{{waypoint.notability}}</td>
+          <td>{{waypoint.description}}</td>
+      </tr>
+
+    {% endfor %}
+    </table>
+  </div>
+
+{% endblock %}

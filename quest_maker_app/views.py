@@ -29,6 +29,15 @@ def homepage(request):
     else:
         return render(request, 'quest_maker_app/homepage.html', {})
 
+def quest_template(request, quest_template_id):
+    q_template = Quest.objects.get(id=quest_template_id)
+    waypoints = sorted(
+        q_template.waypoint_set.all(), key=lambda x: x.distance_from_start)
+
+    params = {"q_template": q_template, "waypoints": waypoints}
+
+    return render(request, 'quest_maker_app/quest_template_detail.html', params)
+
 @csrf_protect
 def signup(request):
     if request.method == 'POST':
@@ -68,7 +77,7 @@ def quest(request, quest_id):
         user_info = UserQuest.objects.get(user_id=user.id).get_info()
 
         everyone_on_quest = quest.get_users_info()
-        yesterday = quest.get_latest_day()
+        yesterday = quest.latest_day
         params = {
             "quest": quest,
             "user_info": user_info,
@@ -91,10 +100,14 @@ def user_quest(request, quest_id, user_id):
         user = User.objects.get(id=user_id)
         user_quest = UserQuest.objects.filter(user_id=user.id).get(
                                               quest_id=quest.id)
+        
         params = {
             "username": user.username,
             "character": user_quest.character,
-            "daily_info": user_quest.get_daily_info()
+            "daily_info": user_quest.get_daily_info(),
+            "quest": quest,
+            "day_finished": user_quest.day_finished,
+            "is_finished": user_quest.day_finished is not None
         }
         return render(request, 'quest_maker_app/user_quest_detail.html', params)
     else:

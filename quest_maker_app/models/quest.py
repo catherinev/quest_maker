@@ -25,10 +25,25 @@ class Quest(models.Model):
     def waypoint_set(self):
         return self.template.waypoint_set
 
+    @property
+    def last_waypoint(self):
+        return self.template.last_waypoint
+
+    @property
+    def length(self):
+        return self.template.length
+
+    @property
+    def latest_day(self):
+        if not hasattr(self, "_latest_day"):
+            self._latest_day = self._get_latest_day()
+        return self._latest_day
+    
     def update_from_fitbit(self):
         """Update with various info from the fitbit API"""
         self.update_timezone_fitbit()
         self.update_dist_fitbit()
+        self.update_total_miles()
 
     def update_dist_fitbit(self):
         """
@@ -39,7 +54,7 @@ class Quest(models.Model):
         for user_quest in self.user_quests.all():
             user = user_quest.user
             new_info = user.profile.update_dist_fitbit(
-                begin_date=self.start_date, end_date=self.get_latest_day())
+                begin_date=self.start_date, end_date=self.latest_day)
             latest_info[user.username] = new_info
         self.users_last_updated = timezone.now()
         self.save()
@@ -60,6 +75,10 @@ class Quest(models.Model):
             self.save()
             return self.hours_offset_utc
 
+    def update_total_miles(self):
+        for user_quest in self.user_quests.all():
+            user_quest.update_total_miles()
+
     def get_users_info(self):
         """Get a dict of info about all users on the quest
         """
@@ -69,7 +88,7 @@ class Quest(models.Model):
             info[user.username] = user_quest.get_info()
         return info
 
-    def get_latest_day(self):
+    def _get_latest_day(self):
         """
         Get the latest data we will report to the user.  We want to report 
         yesterday's data, where "yesterday" is defined according to the timezone

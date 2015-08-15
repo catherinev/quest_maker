@@ -1,7 +1,14 @@
 {% extends "base.html" %}
 
 {% block main_content %}
-  <h1>{{user.name}}</h1>
+  <h1>{{character}} ({{username}})</h1>
+  {% if is_finished %}
+    <h3>Wow! {{character}} passed {{quest.length}} miles on {{day_finished}} and finished {{quest.name}}.</h3>
+  {% endif %}
+  <a href="{% url 'quest_maker_app:quest' quest.pk%}"
+                class="btn btn-info navbar-form pull-right"
+                role="button">Back to quest</a>
+
   <div class="table-responsive">
     <table class="table-hover table">
       <tr>
