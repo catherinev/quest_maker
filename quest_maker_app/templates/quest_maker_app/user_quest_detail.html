@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% load staticfiles %}
+
 
 {% block main_content %}
   <h1>{{character}} ({{username}})</h1>
@@ -20,7 +22,25 @@
     {% for info in daily_info %}
       <tr>
           <td>{{info.day}}</td>
-          <td>{{info.daily_distance}}</td>
+          <td>
+            {% if is_request_user %}
+              {% if info.id %}
+                {{info.daily_distance}}
+                 <a href="{% url 'quest_maker_app:update_daily_distance' info.id %}"
+                  class="btn btn-info navbar-form"
+                  role="button">Edit</a>
+              {% else %}
+                <a href="{% url 'quest_maker_app:create_daily_distance' %}?day={{info.day|date:'Y-m-d'}}"
+                  class="btn btn-info navbar-form"
+                  role="button">Add</a>
+              {% endif %}
+            {% else %}
+              {{info.daily_distance}}
+            {% endif %}
+            {% if info.fitbit %}
+              <img src="{% static 'fitbit-1024-blk-transparent.png' %}" style="width:20px">
+            {% endif %}
+          </td>
           <td>{{info.total_distance}}</td>
           <td>{{info.waypoint.name}}</td>
       </tr>

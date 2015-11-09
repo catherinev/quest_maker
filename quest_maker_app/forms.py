@@ -1,7 +1,10 @@
 import re
 from django import forms
 from django.contrib.auth.models import User
+from quest_maker_app.models import DailyDistance
 from django.utils.translation import ugettext_lazy as _
+from django.forms.extras.widgets import SelectDateWidget
+
 
 class RegistrationForm(forms.Form):
 
@@ -58,3 +61,17 @@ class RegistrationForm(forms.Form):
             if cd['password1'] != cd['password2']:
                 raise forms.ValidationError(_("Passwords do not match."))
         return cd
+
+
+class DailyDistanceFormDefaultDay(forms.ModelForm):
+    class Meta:
+        model = DailyDistance
+        fields = ('miles', 'day')
+        widgets = {'day': forms.HiddenInput()}
+
+
+class DailyDistanceForm(forms.ModelForm):
+    class Meta:
+        model = DailyDistance
+        fields = ('miles', 'day')
+        widgets = {'day': SelectDateWidget()}

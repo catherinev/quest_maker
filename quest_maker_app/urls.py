@@ -44,4 +44,10 @@ urlpatterns = [
     url(r'^fitbit_signup/$',
         views.fitbit_signup,
         name='fitbit_signup'),
+    url(r'^daily_distance/(?P<daily_distance_id>\d+)/$',
+        views.update_daily_distance,
+        name='update_daily_distance'),
+    url(r'^daily_distance/new/$',
+        views.create_daily_distance,
+        name='create_daily_distance')
 ]

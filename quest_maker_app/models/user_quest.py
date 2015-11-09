@@ -31,7 +31,7 @@ class UserQuest(models.Model):
     @property
     def latest_day(self):
         if not hasattr(self, "_latest_day"):
-            self._latest_day = self.quest.latest_day
+            self._latest_day = self.day_finished or self.quest.latest_day
         return self._latest_day
 
     @property 
@@ -106,7 +106,9 @@ class UserQuest(models.Model):
                 "day": datum.day,
                 "daily_distance": datum.miles,
                 "total_distance": self.get_total_miles(end_date=datum.day),
-                "waypoint": self.get_waypoint(day=datum.day)
+                "waypoint": self.get_waypoint(day=datum.day),
+                "id": datum.pk,
+                "fitbit": not datum.manually_entered
             })
         # add any days that aren't in the database
         days_in_db = {datum["day"] for datum in info}
@@ -118,7 +120,8 @@ class UserQuest(models.Model):
                 "day": day,
                 "daily_distance": "-",
                 "total_distance": self.get_total_miles(end_date=day),
-                "waypoint": self.get_waypoint(day=day)
+                "waypoint": self.get_waypoint(day=day),
+                "id": None
             })
 
         info = sorted(info, key=lambda x: x["day"], reverse=True)
