@@ -1,0 +1,14 @@
+
+{% extends "base.html" %}
+
+{% block main_content %}
+  <h2>Update your daily info for {{day}}</h2>
+    <form method="post" action="." next={{next_url}}>
+    {% csrf_token %}
+      <table border="0">
+          {{ form.as_table }}
+      </table>
+    <input type="submit" value="Update" />
+    </form>
+
+{% endblock %}

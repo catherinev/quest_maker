@@ -123,6 +123,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'quest_maker/static/css'),
     os.path.join(BASE_DIR, 'quest_maker/static/js'),
     os.path.join(BASE_DIR, 'quest_maker/static/bootstrap'),
+    os.path.join(BASE_DIR, 'quest_maker/static/imgs'),
 )
 
 TEMPLATE_DIRS = (

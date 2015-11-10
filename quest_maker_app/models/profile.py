@@ -78,13 +78,45 @@ class Profile(models.Model):
 
             # 3. Add NEW data from Fitbit to db
             missing_days = fitbit_days - db_days
-            new_fitbit_distances = [datum for datum in fitbit_distances 
-                                    if datum.day in missing_days]
+            new_fitbit_distances = []
+            old_fitbit_distances = []
+            for datum in fitbit_distances:
+                if datum.day in missing_days:
+                    new_fitbit_distances.append(datum)
+                else:
+                    old_fitbit_distances.append(datum)
 
             for datum in new_fitbit_distances:
                 datum.save()
-            
+            self._update_past_week(old_fitbit_distances)
+
             return new_fitbit_distances
+
+    def _update_past_week(self, fitbit_distances):
+        """We may grab incomplete data from Fitbit.  For example, if a tracker
+        gets synced on Wednesday afternoon, we update our app on Wednesday
+        night, and then the tracker syncs again on Thursday, we need to make
+        sure we pick up all the steps recorded between the Wednesday afternoon
+        sync and EOD Wednesday.
+
+        Since fitbit trackers only keep data for a week, we should not need to 
+        check back further than 1 week.
+        """
+        seven_days_ago = (datetime.datetime.today() - datetime.timedelta(days=8)
+            ).date()
+        past_week = sorted(
+            (datum for datum in fitbit_distances if datum.day >= seven_days_ago), 
+            key=lambda datum: datum.day,
+            reverse=True
+        )
+        for datum in past_week:
+            old_distance = DailyDistance.objects.get(day=datum.day)
+            if old_distance.miles == datum.miles:
+                # if the distance hasn't changed, then any previous distances
+                # also haven't changed
+                break
+            old_distance.miles = datum.miles
+            old_distance.save()
 
     def get_dist_fitbit(self, begin_date, end_date):
         """

@@ -36,17 +36,17 @@ waypoint2 = Waypoint(quest_template_id=1,
                      notability="high",
                      distance_from_start=4.0,
                      name="waypoint 2",
-                     description="this is waypoint 1")
+                     description="this is waypoint 2")
 waypoint3 = Waypoint(quest_template_id=1, 
                      notability="low",
                      distance_from_start=7.0,
                      name="waypoint 3",
-                     description="this is waypoint 1")
+                     description="this is waypoint 3")
 waypoint4 = Waypoint(quest_template_id=1, 
                      notability="medium",
                      distance_from_start=15.0,
                      name="waypoint 4",
-                     description="this is waypoint 1")
+                     description="this is waypoint 4")
 start.save()
 waypoint1.save()
 waypoint2.save()

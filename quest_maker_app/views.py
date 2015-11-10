@@ -8,12 +8,13 @@ from django.template import RequestContext
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
 
-from models import Quest, User, UserQuest
-from forms import RegistrationForm
+from models import Quest, QuestTemplate, User, UserQuest, DailyDistance, Profile
+from forms import (RegistrationForm, DailyDistanceFormDefaultDay,
+    DailyDistanceForm)
+import util
 from django.conf import settings
 
 import datetime
-from django.utils import timezone
 
 
 def homepage(request):
@@ -30,7 +31,7 @@ def homepage(request):
         return render(request, 'quest_maker_app/homepage.html', {})
 
 def quest_template(request, quest_template_id):
-    q_template = Quest.objects.get(id=quest_template_id)
+    q_template = QuestTemplate.objects.get(id=quest_template_id)
     waypoints = sorted(
         q_template.waypoint_set.all(), key=lambda x: x.distance_from_start)
 
@@ -50,6 +51,10 @@ def signup(request):
             )
             user = authenticate(username=form.cleaned_data['username'],
                                     password=form.cleaned_data['password1'])
+            profile = Profile(
+                first_name=form.cleaned_data['first_name'],
+                last_name=form.cleaned_data['last_name'], user=user)
+            profile.save()
             login(request, user)
             msg = ("Thanks for registering! You are now logged in and ready to "
                    "go questing.")
@@ -62,6 +67,59 @@ def signup(request):
 
     return render_to_response('registration/signup.html', variables)
 
+@csrf_protect
+@login_required
+def create_daily_distance(request):
+    if request.method == 'POST':
+        form = DailyDistanceForm(request.POST)
+        new_daily_distance = form.save(commit=False)
+        new_daily_distance.manually_entered = True
+        new_daily_distance.user = request.user
+        new_daily_distance.save()
+
+        msg = ("You have added daily information for {}.".format(
+            new_daily_distance.day))
+        messages.info(request, msg)
+        return HttpResponseRedirect(reverse('quest_maker_app:homepage'))
+    else:
+        day = request.GET.get('day')
+        if day:
+            day = datetime.datetime.strptime(day, "%Y-%m-%d").date()
+            default_data = {"day": day}
+            form = DailyDistanceFormDefaultDay(default_data)
+        else:
+            form = DailyDistanceForm()
+
+    variables = RequestContext(request, {'form': form})
+    variables.push({'day': day})
+    return render_to_response('quest_maker_app/edit_daily_distance.html', 
+        variables)
+
+@csrf_protect
+def update_daily_distance(request, daily_distance_id):
+    daily_distance = DailyDistance.objects.get(pk=daily_distance_id)
+    if daily_distance.user == request.user:
+        if request.method == 'POST':
+            form = DailyDistanceForm(
+                request.POST, instance=daily_distance)
+            new_daily_distance = form.save(commit=False)
+            new_daily_distance.manually_entered = True
+            new_daily_distance.save()
+
+            msg = ("You have updated your daily information for {}.".format(
+                new_daily_distance.day))
+            messages.info(request, msg)
+            # this should probably be smarter about redirecting
+            return HttpResponseRedirect(reverse('quest_maker_app:homepage'))
+        else:
+            form = DailyDistanceFormDefaultDay(instance=daily_distance)
+
+        variables = RequestContext(request, 
+                                   {'form': form, 'day': daily_distance.day})
+        return render_to_response('quest_maker_app/edit_daily_distance.html', 
+            variables)
+    else:
+        raise PermissionDenied
 
 @login_required
 def quest(request, quest_id):
@@ -69,12 +127,8 @@ def quest(request, quest_id):
     quest = Quest.objects.get(id=quest_id)
     # make sure user has access to quest
     if quest in user.quest_set.all():
-        # update database at most once an hour
-        now = timezone.now()
-        mins_since_last_updated = (now - quest.users_last_updated).seconds / 60
-        if mins_since_last_updated > 60:
-            quest.update_from_fitbit()
-        user_info = UserQuest.objects.get(user_id=user.id).get_info()
+        util.update_quest(quest)
+        user_info = UserQuest.objects.get(user_id=user.id, quest_id=quest.id).get_info()
 
         everyone_on_quest = quest.get_users_info()
         yesterday = quest.latest_day
@@ -94,9 +148,11 @@ def user_quest(request, quest_id, user_id):
     """
     Show details for a particular user on a particular quest
     """
+
     request_user = request.user
     quest = Quest.objects.get(id=quest_id)
     if quest in request_user.quest_set.all():
+        util.update_quest(quest)
         user = User.objects.get(id=user_id)
         user_quest = UserQuest.objects.filter(user_id=user.id).get(
                                               quest_id=quest.id)
@@ -107,7 +163,8 @@ def user_quest(request, quest_id, user_id):
             "daily_info": user_quest.get_daily_info(),
             "quest": quest,
             "day_finished": user_quest.day_finished,
-            "is_finished": user_quest.day_finished is not None
+            "is_finished": user_quest.day_finished is not None,
+            "is_request_user": request_user == user
         }
         return render(request, 'quest_maker_app/user_quest_detail.html', params)
     else:
