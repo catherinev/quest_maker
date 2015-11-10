@@ -22,6 +22,15 @@ class QuestTemplate(models.Model):
     @property
     def length(self):
         return self.last_waypoint.distance_from_start
+
+    @property
+    def ordered_waypoint_list(self):
+        try:
+            return self._ordered_waypoint_list
+        except AttributeError:
+            self._ordered_waypoint_list = list(
+                self.waypoint_set.order_by('distance_from_start'))
+            return self._ordered_waypoint_list
     
     def __unicode__(self):
         return "QuestTemplate id={} name={}".format(self.pk, self.name)

@@ -20,6 +20,11 @@ class Waypoint(models.Model):
     notability = models.CharField(choices=NOTABILITY_CHOICES, max_length=10)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
+    @property
+    def rank(self):
+        """Number of waypoint compared to other waypoints on the quest"""
+        return self.quest_template.ordered_waypoint_list.index(self) + 1
+
     def __unicode__(self):
         return "Waypoint id={} name={}".format(self.pk, self.name)
