@@ -5,13 +5,19 @@
   <div class="table-responsive">
     <table class="table-hover table">
       <tr>
+        <th></th>
         <th>Waypoint</th>
         <th>Distance From Beginning</th>
         <th>Notability</th>
         <th>Description</th>
       </tr>
     {% for waypoint in waypoints %}
-      <tr>
+      {% if waypoint.notability == "high" %}
+        <tr class="alert alert-info">
+      {% else %}
+        <tr>
+      {% endif %}
+          <td><b>{{waypoint.rank}}</b></td>
           <td>{{waypoint.name}}</td>
           <td>{{waypoint.distance_from_start}}</td>
           <td>{{waypoint.notability}}</td>

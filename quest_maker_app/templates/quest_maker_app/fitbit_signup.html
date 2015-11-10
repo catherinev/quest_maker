@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
 {% block main_content %}
-  <p>Insert info about privacy</p>
+  <p>Insert info about privacy. </p>
+
+  <p>Short version: if you click the button below, you are agreeing to let this application access your fitbit data.  Distance information will be shared with all users on the same quest as you.  No other information is saved or shared.</p>
 
 
   <a href="{% url 'social:begin' 'fitbit' %}?next={% url 'quest_maker_app:homepage' %}"
