@@ -8,13 +8,13 @@ from django.template import RequestContext
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
 
-from models import Quest, User, UserQuest, DailyDistance, Profile
+from models import Quest, QuestTemplate, User, UserQuest, DailyDistance, Profile
 from forms import (RegistrationForm, DailyDistanceFormDefaultDay,
     DailyDistanceForm)
+import util
 from django.conf import settings
 
 import datetime
-from django.utils import timezone
 
 
 def homepage(request):
@@ -31,7 +31,7 @@ def homepage(request):
         return render(request, 'quest_maker_app/homepage.html', {})
 
 def quest_template(request, quest_template_id):
-    q_template = Quest.objects.get(id=quest_template_id)
+    q_template = QuestTemplate.objects.get(id=quest_template_id)
     waypoints = sorted(
         q_template.waypoint_set.all(), key=lambda x: x.distance_from_start)
 
@@ -127,12 +127,8 @@ def quest(request, quest_id):
     quest = Quest.objects.get(id=quest_id)
     # make sure user has access to quest
     if quest in user.quest_set.all():
-        # update database at most once an hour
-        now = timezone.now()
-        mins_since_last_updated = (now - quest.users_last_updated).seconds / 60
-        if mins_since_last_updated > 60:
-            quest.update_from_fitbit()
-        user_info = UserQuest.objects.get(user_id=user.id).get_info()
+        util.update_quest(quest)
+        user_info = UserQuest.objects.get(user_id=user.id, quest_id=quest.id).get_info()
 
         everyone_on_quest = quest.get_users_info()
         yesterday = quest.latest_day
@@ -152,9 +148,11 @@ def user_quest(request, quest_id, user_id):
     """
     Show details for a particular user on a particular quest
     """
+
     request_user = request.user
     quest = Quest.objects.get(id=quest_id)
     if quest in request_user.quest_set.all():
+        util.update_quest(quest)
         user = User.objects.get(id=user_id)
         user_quest = UserQuest.objects.filter(user_id=user.id).get(
                                               quest_id=quest.id)

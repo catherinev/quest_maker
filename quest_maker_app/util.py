@@ -1,6 +1,7 @@
 """Helper functions that may be used throughout the application"""
 
 from datetime import datetime, timedelta, date
+from django.utils import timezone
 
 FITBIT_DATETIME_FORMAT = "%Y-%m-%d"
 
@@ -31,4 +32,15 @@ def daterange(begin_date, end_date, inclusive=False):
         num_days += 1
     for num in range(num_days):
         yield begin_date + timedelta(num)
+
+def update_quest(quest):
+    """
+    Check if we have updated the quest from fitbit recently.  If not,
+    update.
+    """
+    # update database at most once an hour
+    now = timezone.now()
+    mins_since_last_updated = (now - quest.users_last_updated).seconds / 60
+    if mins_since_last_updated > 0:
+        quest.update_from_fitbit()
         
